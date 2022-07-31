@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass
-
+from typing import Dict, Type
+from abc import ABCMeta, abstractmethod
 
 @dataclass
 class InfoMessage:
@@ -30,9 +31,9 @@ class Training:
                  duration: float,
                  weight: float,
                  ) -> None:
-        self.action = action
-        self.duration = duration
-        self.weight = weight
+        self.action: int = action
+        self.duration: float = duration
+        self.weight: float = weight
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -42,6 +43,8 @@ class Training:
         """Получить среднюю скорость движения."""
         return self.get_distance() / self.duration
 
+    __metaclass__ = ABCMeta
+    @abstractmethod
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
         pass
@@ -57,16 +60,22 @@ class Training:
 
 class Running(Training):
     """Тренировка: бег."""
+    BODY_MASS_INDEX: int = 18
+    COEFF_CALORIE: int = 20
+
     def get_spent_calories(self) -> float:
-        coeff_calorie_1 = 18
-        coeff_calorie_2 = 20
-        time_in_min = self.duration * 60  # Время в минутах
-        cal = (coeff_calorie_1 * self.get_mean_speed() - coeff_calorie_2)
-        return cal * self.weight / self.M_IN_KM * (time_in_min)
+        time_in_min: float = self.duration * 60  # Время в минутах
+        calories_burn_min = (self.BODY_MASS_INDEX * self.get_mean_speed()
+                             - self.COEFF_CALORIE) * self.weight / self.M_IN_KM
+        return calories_burn_min * (time_in_min)
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
+    BODY_MASS_INDEX: float = 0.035  # Коэффициент массы тела
+    COEFF_CALORIE: float = 0.029
+    MIN_IN_HOUR: int = 60
+
     def __init__(self,
                  action: int,
                  duration: float,
@@ -76,20 +85,23 @@ class SportsWalking(Training):
         # наследуем функциональность конструктора из класса-родителя
         super().__init__(action, duration, weight)
         # добавляем новую функциональность: свойство height
-        self.height = height
+        self.height: float = height
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        coeff_calorie_1: float = 0.035
-        coeff_calorie_2: float = 0.029
-        time = self.duration * 60  # Время в минутах
-        cal = ((self.get_mean_speed())**2 // self.height) * coeff_calorie_2
-        return (coeff_calorie_1 * self.weight + cal * self.weight) * time
+        duration_min: float = self.duration * self.MIN_IN_HOUR
+        calories_burn_min = (self.BODY_MASS_INDEX * self.weight
+                             + ((self.get_mean_speed())**2
+                             // self.height) * self.COEFF_CALORIE
+                             * self.weight)
+        return calories_burn_min * duration_min
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP: float = 1.38
+    BODY_MASS_INDEX: float = 1.1
+    COEFF_CALORIE: int = 2
 
     def __init__(self,
                  action: int,
@@ -101,27 +113,27 @@ class Swimming(Training):
         # наследуем функциональность конструктора из класса-родителя
         super().__init__(action, duration, weight)
         # добавляем новую функциональность: свойство length_pool, count_pool
-        self.length_pool = length_pool
-        self.count_pool = count_pool
+        self.length_pool: float = length_pool
+        self.count_pool: float = count_pool
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
-        sp = (self.length_pool * self.count_pool / self.M_IN_KM)
+        sp: float = (self.length_pool * self.count_pool / self.M_IN_KM)
         return sp / self.duration
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        coeff_calorie_1: float = 1.1
-        coeff_calorie_2: int = 2
-        cal = (self.get_mean_speed() + coeff_calorie_1)
-        return cal * coeff_calorie_2 * self.weight
+        cal: float = (self.get_mean_speed() + self.BODY_MASS_INDEX)
+        return cal * self.COEFF_CALORIE * self.weight
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    workout = {'SWM': Swimming,
-               'RUN': Running,
-               'WLK': SportsWalking}
+    workout: Dict[str, Type[Training]] = {'SWM': Swimming,
+                                          'RUN': Running,
+                                          'WLK': SportsWalking}
+    if workout_type not in workout:
+        raise KeyError(f'Получен неизвестный тип тренировки: {workout_type}')
     return workout[workout_type](*data)
 
 
