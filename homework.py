@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from typing import Dict, Type
-from abc import ABCMeta, abstractmethod
+
 
 @dataclass
 class InfoMessage:
@@ -43,11 +43,9 @@ class Training:
         """Получить среднюю скорость движения."""
         return self.get_distance() / self.duration
 
-    __metaclass__ = ABCMeta
-    @abstractmethod
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError('Не запустился расчет каллорий')
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -91,9 +89,8 @@ class SportsWalking(Training):
         """Получить количество затраченных калорий."""
         duration_min: float = self.duration * self.MIN_IN_HOUR
         calories_burn_min = (self.BODY_MASS_INDEX * self.weight
-                             + ((self.get_mean_speed())**2
-                             // self.height) * self.COEFF_CALORIE
-                             * self.weight)
+                             + ((self.get_mean_speed())**2 // self.height)
+                             * self.COEFF_CALORIE * self.weight)
         return calories_burn_min * duration_min
 
 
