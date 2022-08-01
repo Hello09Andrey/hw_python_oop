@@ -28,12 +28,12 @@ class Training:
 
     def __init__(self,
                  action: int,
-                 duration: float,
-                 weight: float,
+                 duration_h: float,
+                 weight_kg: float,
                  ) -> None:
         self.action: int = action
-        self.duration: float = duration
-        self.weight: float = weight
+        self.duration: float = duration_h
+        self.weight: float = weight_kg
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -76,14 +76,14 @@ class SportsWalking(Training):
 
     def __init__(self,
                  action: int,
-                 duration: float,
-                 weight: float,
-                 height: float
+                 duration_h: float,
+                 weight_kg: float,
+                 height_cm: float
                  ) -> None:
         # наследуем функциональность конструктора из класса-родителя
-        super().__init__(action, duration, weight)
+        super().__init__(action, duration_h, weight_kg)
         # добавляем новую функциональность: свойство height
-        self.height: float = height
+        self.height: float = height_cm
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
@@ -102,15 +102,15 @@ class Swimming(Training):
 
     def __init__(self,
                  action: int,
-                 duration: float,
-                 weight: float,
-                 length_pool: float,
+                 duration_h: float,
+                 weight_kg: float,
+                 length_pool_m: float,
                  count_pool: float
                  ) -> None:
         # наследуем функциональность конструктора из класса-родителя
-        super().__init__(action, duration, weight)
+        super().__init__(action, duration_h, weight_kg)
         # добавляем новую функциональность: свойство length_pool, count_pool
-        self.length_pool: float = length_pool
+        self.length_pool: float = length_pool_m
         self.count_pool: float = count_pool
 
     def get_mean_speed(self) -> float:
